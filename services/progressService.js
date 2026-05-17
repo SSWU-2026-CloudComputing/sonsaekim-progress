@@ -205,6 +205,36 @@ exports.getMypage = async (userId) => {
         BookmarkWord.findAll({ where: { user_id: userId } }),
     ]);
 
+    const vcBookmarks = await Promise.all(
+        vcBookmarksRaw.map(async (b) => {
+            try {
+                const detail = await learningClient.getSignVcById(b.vc_id);
+                return {
+                    vc_id:       b.vc_id,
+                    image:       detail.image,
+                    description: detail.description,
+                };
+            } catch {
+                return { vc_id: b.vc_id, image: '', description: '' };
+            }
+        })
+    );
+
+    const wordBookmarks = await Promise.all(
+        wordBookmarksRaw.map(async (b) => {
+            try {
+                const detail = await learningClient.getSignWordById(b.word_id);
+                return {
+                    word_id:     b.word_id,
+                    image:       detail.image,
+                    description: detail.description,
+                };
+            } catch {
+                return { word_id: b.word_id, image: '', description: '' };
+            }
+        })
+    );
+
     return {
         name:            user.name,
         email:           user.email,
@@ -214,8 +244,8 @@ exports.getMypage = async (userId) => {
         daysToNextLevel: 7 - (totalDays % 7),
         continuousDays:  continuous,
         attendanceDates,
-        vcBookmarkIds:   vcBookmarksRaw.map(b => b.vc_id),
-        wordBookmarkIds: wordBookmarksRaw.map(b => b.word_id),
+        vcBookmarks,    // ← { vc_id, image, description } 배열
+        wordBookmarks,  // ← { word_id, image, description } 배열
     };
 };
 
