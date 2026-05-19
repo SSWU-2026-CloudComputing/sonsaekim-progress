@@ -81,37 +81,68 @@ exports.getWrongIds = async (userId) => {
 };
 
 
-// ══════════════════════════════════════════════════════════
-// 북마크 토글 ← quizService.toggleBookmark 에서 가져옴
-// ══════════════════════════════════════════════════════════
-exports.toggleBookmark = async (userId, sourceType, sourceId) => {
+// ── 기존 toggleBookmark 교체 ──
+
+// 북마크 조회
+exports.getBookmarks = async (userId, sourceType) => {
+    if (sourceType === 'sign_word') {
+        return await BookmarkWord.findAll({
+            where: { user_id: userId },
+        });
+    } else if (sourceType === 'sign_vc') {
+        return await BookmarkVc.findAll({
+            where: { user_id: userId },
+        });
+    } else {
+        // sourceType 없으면 전체 반환
+        const [vcBookmarks, wordBookmarks] = await Promise.all([
+            BookmarkVc.findAll({ where: { user_id: userId } }),
+            BookmarkWord.findAll({ where: { user_id: userId } }),
+        ]);
+        return { vcBookmarks, wordBookmarks };
+    }
+};
+
+// 북마크 추가
+exports.addBookmark = async (userId, sourceType, sourceId) => {
     if (sourceType === 'sign_word') {
         const existing = await BookmarkWord.findOne({
             where: { user_id: userId, word_id: sourceId },
         });
-        if (existing) {
-            await BookmarkWord.destroy({ where: { user_id: userId, word_id: sourceId } });
-            return 'removed';
-        } else {
-            await BookmarkWord.create({ user_id: userId, word_id: sourceId });
-            return 'added';
-        }
+        if (existing) throw new Error('ALREADY_BOOKMARKED');
+        await BookmarkWord.create({ user_id: userId, word_id: sourceId });
 
     } else if (sourceType === 'sign_vc') {
         const existing = await BookmarkVc.findOne({
             where: { user_id: userId, vc_id: sourceId },
         });
-        if (existing) {
-            await BookmarkVc.destroy({ where: { user_id: userId, vc_id: sourceId } });
-            return 'removed';
-        } else {
-            await BookmarkVc.create({ user_id: userId, vc_id: sourceId });
-            return 'added';
-        }
+        if (existing) throw new Error('ALREADY_BOOKMARKED');
+        await BookmarkVc.create({ user_id: userId, vc_id: sourceId });
+
     } else {
         throw new Error('유효하지 않은 sourceType입니다.');
     }
 };
+
+// 북마크 삭제
+exports.removeBookmark = async (userId, sourceType, sourceId) => {
+    if (sourceType === 'sign_word') {
+        const deleted = await BookmarkWord.destroy({
+            where: { user_id: userId, word_id: sourceId },
+        });
+        if (!deleted) throw new Error('BOOKMARK_NOT_FOUND');
+
+    } else if (sourceType === 'sign_vc') {
+        const deleted = await BookmarkVc.destroy({
+            where: { user_id: userId, vc_id: sourceId },
+        });
+        if (!deleted) throw new Error('BOOKMARK_NOT_FOUND');
+
+    } else {
+        throw new Error('유효하지 않은 sourceType입니다.');
+    }
+};
+
 
 
 // ══════════════════════════════════════════════════════════

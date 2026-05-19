@@ -21,13 +21,52 @@ exports.getWrongIds = async (req, res) => {
     }
 };
 
-exports.toggleBookmark = async (req, res) => {
+// ── 기존 toggleBookmark 3개로 분리 ──────────
+
+// GET /progress/bookmarks?userId=&sourceType=
+// (userId는 쿼리로도 받지만 헤더 x-user-id 우선)
+exports.getBookmarks = async (req, res) => {
     try {
-        const { sourceType, sourceId } = req.body;
-        const result = await progressService.toggleBookmark(req.userId, sourceType, sourceId);
-        res.json({ result });
+        const userId     = req.userId;
+        const sourceType = req.query.sourceType; // 'sign_vc' | 'sign_word'
+        const data = await progressService.getBookmarks(userId, sourceType);
+        res.json(data);
     } catch (err) {
-        console.error('toggleBookmark 오류:', err);
+        console.error('getBookmarks 오류:', err);
+        res.status(500).json({ message: '서버 오류' });
+    }
+};
+
+// POST /progress/bookmarks
+// body: { sourceType, sourceId }
+exports.addBookmark = async (req, res) => {
+    try {
+        const userId     = req.userId;
+        const { sourceType, sourceId } = req.body;
+        await progressService.addBookmark(userId, sourceType, sourceId);
+        res.json({ message: '북마크 추가 완료' });
+    } catch (err) {
+        if (err.message === 'ALREADY_BOOKMARKED') {
+    	    return res.status(409).json({ message: '이미 북마크된 항목입니다.' });
+    	}
+	console.error('addBookmark 오류:', err);
+        res.status(500).json({ message: '서버 오류' });
+    }
+};
+
+// DELETE /progress/bookmarks
+// body: { sourceType, sourceId }
+exports.removeBookmark = async (req, res) => {
+    try {
+        const userId     = req.userId;
+        const { sourceType, sourceId } = req.body;
+        await progressService.removeBookmark(userId, sourceType, sourceId);
+        res.json({ message: '북마크 삭제 완료' });
+    } catch (err) {
+        if (err.message === 'BOOKMARK_NOT_FOUND') {
+            return res.status(404).json({ message: '북마크를 찾을 수 없습니다.' });
+        }
+	console.error('removeBookmark 오류:', err);
         res.status(500).json({ message: '서버 오류' });
     }
 };

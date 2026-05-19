@@ -16,7 +16,7 @@ app.use(express.json());
 // 헬스체크 (Kubernetes Liveness Probe용)
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
-app.use('/api', progressRouter);
+app.use('/progress', progressRouter);
 
 const start = async () => {
     try {

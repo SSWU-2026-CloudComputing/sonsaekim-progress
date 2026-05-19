@@ -6,21 +6,36 @@ const authMiddleware = require('../middlewares/authMiddleware');
 
 router.use(authMiddleware);
 
-// 마이페이지
+// ── 북마크 ────────────────────────────────────────
+// GET  /progress/bookmarks?userId=&sourceType=
+router.get('/bookmarks',    ctrl.getBookmarks);
+
+// POST /progress/bookmarks
+router.post('/bookmarks',   ctrl.addBookmark);
+
+// DELETE /progress/bookmarks
+router.delete('/bookmarks', ctrl.removeBookmark);
+
+// ── 오답 ──────────────────────────────────────────
+// GET /progress/wrong-answers?userId=
+router.get('/wrong-answers', ctrl.getWrongIds);
+
+// ── 랭킹 ──────────────────────────────────────────
+// GET /progress/ranking/top3
+router.get('/ranking/top3',  ctrl.getTop3Records);
+
+// GET /progress/ranking/all
+router.get('/ranking/all',   ctrl.getAllRecords);
+
+// ── 점수 ──────────────────────────────────────────
+// GET /progress/score/best?userId=
+router.get('/score/best',    ctrl.getUserTopScore);
+
+// ──마이페이지, 출석, 게임기록 저장 ────────────────
 router.get('/mypage',                          ctrl.getMypage);
 router.post('/attendance',                     ctrl.checkAttendance);
-
-// 오답
-router.get('/quiz/wrong',                      ctrl.getWrongIds);
-
-// 북마크
-router.post('/quiz/bookmark/toggle',           ctrl.toggleBookmark);
+router.post('/game/record',                    ctrl.createRecord);
 router.get('/mypage/bookmarkDetail/vc/:id',    ctrl.getVcBookmarkDetail);
 router.get('/mypage/bookmarkDetail/word/:id',  ctrl.getWordBookmarkDetail);
-
-// 게임
-router.post('/game/record',                    ctrl.createRecord);
-router.get('/game/top3',                       ctrl.getTop3Records);
-router.get('/game/my-best-score',              ctrl.getUserTopScore);
 
 module.exports = router;
