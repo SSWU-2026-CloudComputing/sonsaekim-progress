@@ -247,36 +247,28 @@ exports.getMypage = async (userId) => {
         BookmarkWord.findAll({ where: { user_id: userId } }),
     ]);
 
-    const vcBookmarks = await Promise.all(
-        vcBookmarksRaw.map(async (b) => {
-            try {
-                const detail = await learningClient.getSignVcById(b.vc_id);
-                return {
-                    vc_id:       b.vc_id,
-                    image:       detail.image,
-                    description: detail.description,
-                };
-            } catch {
-		// Learning Service 장애 시 이미지 없이라도 북마크 목록 반환
-                return { vc_id: b.vc_id, image: '', description: '' };
-            }
-        })
-    );
+    // 개선- vc와 word를 동시에 실행
+    const [vcBookmarks, wordBookmarks] = await Promise.all([
 
-    const wordBookmarks = await Promise.all(
-        wordBookmarksRaw.map(async (b) => {
+    	Promise.all(vcBookmarksRaw.map(async (b) => {
             try {
-                const detail = await learningClient.getSignWordById(b.word_id);
-                return {
-                    word_id:     b.word_id,
-                    image:       detail.image,
-                    description: detail.description,
-                };
+            	const detail = await learningClient.getSignVcById(b.vc_id);
+                return { vc_id: b.vc_id, image: detail.image, description: detail.description };
             } catch {
-                return { word_id: b.word_id, image: '', description: '' };
+    	        return { vc_id: b.vc_id, image: '', description: '' };
             }
-        })
-    );
+	})),
+
+    	Promise.all(wordBookmarksRaw.map(async (b) => {
+            try {
+            	const detail = await learningClient.getSignWordById(b.word_id);
+            	return { word_id: b.word_id, image: detail.image, description: detail.description };
+            } catch {
+            	return { word_id: b.word_id, image: '', description: '' };
+            }
+   	 })),
+
+    ]);
 
     return {
         name:            user.name,
