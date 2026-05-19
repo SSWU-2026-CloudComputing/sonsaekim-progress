@@ -22,7 +22,7 @@ app.use('/progress', progressRouter);
 const validateEnv = () => {
     const required = [
         'PORT',
-        'DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASSWORD',
+        'DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASS',
         'RABBITMQ_URL',
         'USER_SERVICE_URL',
         'LEARNING_SERVICE_URL',
@@ -45,6 +45,9 @@ const start = async () => {
         // 1. DB 연결 확인
         await sequelize.authenticate();
         console.log('✅ Progress DB 연결 완료');
+
+        await sequelize.sync();
+        console.log('테이블 생성 완료');
 
         // 2.증 RabbitMQ 연결
         await connect();
