@@ -15,9 +15,13 @@ const getKoreanDateString = (date = new Date()) => {
     return new Date(date.getTime() + koreaOffset).toISOString().slice(0, 10);
 };
 
-// ── 레벨 계산 (Progress 단독 소유) ──────────────────────
-const calcLevel = (totalDays) => Math.floor(totalDays / 7) + 1;
+// ── 레벨 계산 (최대 3까지) ──────────────────────
+const MAX_LEVEL = 3; // EJS에 level1~3.svg 까지만 있음
 
+const calcLevel = (totalDays) => {
+    const level = Math.floor(totalDays / 7) + 1;
+    return Math.min(level, MAX_LEVEL); // 최대 3으로 제한
+};
 
 // ══════════════════════════════════════════════════════════
 // 오답 저장 ← quizService.saveQuizResults 에서 가져옴
@@ -177,7 +181,14 @@ exports.getUserTopScore = async (userId) => {
 exports.getMypage = async (userId) => {
     // 기존: const user = await User.findOne(...)
     // 전환: User Service API 호출
-    const user = await userClient.getUserById(userId);
+    
+    // User Service 장애 시 기본값으로 fallback
+    let user = { name: '알 수 없음', email: '', favorite_study: null };
+    try {
+        user = await userClient.getUserById(userId);
+    } catch (err) {
+        console.error('[getMypage] User Service 호출 실패, fallback 사용:', err.message);
+    }
 
     const today     = new Date();
     const startDate = new Date();
@@ -246,6 +257,7 @@ exports.getMypage = async (userId) => {
                     description: detail.description,
                 };
             } catch {
+		// Learning Service 장애 시 이미지 없이라도 북마크 목록 반환
                 return { vc_id: b.vc_id, image: '', description: '' };
             }
         })

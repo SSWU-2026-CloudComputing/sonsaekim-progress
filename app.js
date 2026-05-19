@@ -18,13 +18,35 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use('/progress', progressRouter);
 
+//환경변수 검증 함수
+const validateEnv = () => {
+    const required = [
+        'PORT',
+        'DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASSWORD',
+        'RABBITMQ_URL',
+        'USER_SERVICE_URL',
+        'LEARNING_SERVICE_URL',
+    ];
+
+    const missing = required.filter(key => !process.env[key]);
+
+    if (missing.length > 0) {
+        console.error('❌ 필수 환경변수 누락:', missing.join(', '));
+        process.exit(1);
+    }
+
+    console.log('✅ 환경변수 검증 완료');
+};
+
 const start = async () => {
+    //환경변수 검증 실시
+    validateEnv();  
     try {
         // 1. DB 연결 확인
         await sequelize.authenticate();
         console.log('✅ Progress DB 연결 완료');
 
-        // 2. RabbitMQ 연결
+        // 2.증 RabbitMQ 연결
         await connect();
 
         // 3. Consumer 시작
