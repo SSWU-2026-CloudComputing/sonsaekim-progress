@@ -102,6 +102,15 @@ exports.createRecord = async (req, res) => {
     }
 };
 
+exports.getAllGameRecords = async (req, res) => {
+    try {
+        const records = await gameService.getAllRecords();
+        res.json(records);
+    } catch (err) {
+        res.status(500).json({ error: '기록 가져오기 실패' });
+    }
+};
+
 exports.getTop3Records = async (req, res) => {
     try {
         const data = await progressService.getTop3Records();

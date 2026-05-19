@@ -2,9 +2,6 @@
 const express        = require('express');
 const router         = express.Router();
 const ctrl           = require('../controllers/progressController');
-const authMiddleware = require('../middlewares/authMiddleware');
-
-router.use(authMiddleware);
 
 // ── 북마크 ────────────────────────────────────────
 // GET  /progress/bookmarks?userId=&sourceType=
@@ -25,7 +22,7 @@ router.get('/wrong-answers', ctrl.getWrongIds);
 router.get('/ranking/top3',  ctrl.getTop3Records);
 
 // GET /progress/ranking/all
-router.get('/ranking/all',   ctrl.getAllRecords);
+router.get('/ranking/all',   ctrl.getAllGameRecords);
 
 // ── 점수 ──────────────────────────────────────────
 // GET /progress/score/best?userId=
