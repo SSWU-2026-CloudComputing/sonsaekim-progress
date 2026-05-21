@@ -11,6 +11,9 @@ const connect = async () => {
         connection = await amqp.connect(process.env.RABBITMQ_URL);
         channel    = await connection.createChannel();
 
+        await channel.assertExchange('learning.events', 'topic', { durable: true });
+
+
         console.log('✅ RabbitMQ 연결 완료');
 
         // 연결 끊기면 일정 시간 후 재연결 시도

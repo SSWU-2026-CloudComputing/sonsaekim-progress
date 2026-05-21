@@ -4,9 +4,12 @@ const progressService = require('../services/progressService');
 
 const start = async () => {
     const ch = getChannel();
-    await ch.assertQueue('quiz.submitted', { durable: true });
 
-    ch.consume('quiz.submitted', async (msg) => {
+    await ch.assertQueue('quiz.submitted', { durable: true });
+    await ch.bindQueue('quiz.submitted', 'learning.events', 'quiz.submitted');
+
+    ch.consume(q.queue, async (msg) => {
+        if (!msg) return;
         try {
             const { userId, quizResults } = JSON.parse(msg.content.toString());
             await progressService.saveQuizResults(userId, quizResults);

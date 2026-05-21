@@ -4,11 +4,14 @@ const progressService = require('../services/progressService');
 
 const start = async () => {
     const ch = getChannel();
-    await ch.assertQueue('game.played', { durable: true });
 
-    ch.consume('game.played', async (msg) => {
+    await ch.assertQueue('game.played', { durable: true });
+    await ch.bindQueue('game.played', 'learning.events', 'game.played');
+
+    ch.consume(q.queue, async (msg) => {
+        if (!msg) return;
         try {
-            const { userId, score, userName } = JSON.parse(msg.content.toString());
+            const { userId, userName, score } = JSON.parse(msg.content.toString());
             await progressService.createRecord(userId, score, userName);
             ch.ack(msg);
             console.log(`[game.played] userId=${userId} 기록 저장 완료`);
