@@ -16,6 +16,7 @@ app.use(express.json());
 // 헬스체크 (Kubernetes Liveness Probe용)
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
+//라우터
 app.use('/progress', progressRouter);
 
 //환경변수 검증 함수
@@ -43,13 +44,10 @@ const start = async () => {
     validateEnv();  
     try {
         // 1. DB 연결 확인
-        await sequelize.authenticate();
+        await sequelize.sync();
         console.log('✅ Progress DB 연결 완료');
 
-        await sequelize.sync();
-        console.log('테이블 생성 완료');
-
-        // 2.증 RabbitMQ 연결
+        // 2. RabbitMQ 연결
         await connect();
 
         // 3. Consumer 시작
@@ -59,8 +57,8 @@ const start = async () => {
         await inferenceCompletedConsumer.start();
 
         // 4. 서버 시작
-        app.listen(process.env.PORT || 3003, () => {
-            console.log(`✅ Progress Service 실행 중 — port ${process.env.PORT || 3003}`);
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`✅ Progress Service running on port ${PORT}`);
         });
 
     } catch (err) {
