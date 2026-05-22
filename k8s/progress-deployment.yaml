@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonsaekim-progress
+  labels:
+    app: sonsaekim-progress
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sonsaekim-progress
+  template:
+    metadata:
+      labels:
+        app: sonsaekim-progress
+    spec:
+      containers:
+        - name: sonsaekim-progress
+          image: mminnn28/sswu_sonsaekim-progress:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3003
+          env:
+            - name: PORT
+              value: "3003"
+            - name: NODE_ENV
+              value: "production"
+            - name: DB_HOST
+              value: "10.178.0.33"
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_NAME
+              value: "progress_db"
+            - name: DB_USER
+              value: "root"
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: progress-secret
+                  key: DB_PASS
+            - name: RABBITMQ_URL
+              valueFrom:
+                secretKeyRef:
+                  name: progress-secret
+                  key: RABBITMQ_URL
+            - name: USER_SERVICE_URL
+              value: "http://sonsaekim-auth-svc"
+            - name: LEARNING_SERVICE_URL
+              value: "http://sonsaekim-learning-svc:3002"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 15
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonsaekim-progress-svc
+spec:
+  selector:
+    app: sonsaekim-progress
+  ports:
+    - protocol: TCP
+      port: 3003
+      targetPort: 3003
+  type: ClusterIP
