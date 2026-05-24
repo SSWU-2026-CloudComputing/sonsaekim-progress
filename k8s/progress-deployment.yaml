@@ -46,7 +46,7 @@ spec:
             - name: USER_SERVICE_URL
               value: "http://sonsaekim-auth-svc"
             - name: LEARNING_SERVICE_URL
-              value: "http://sonsaekim-learning-svc:3002"
+              value: "http://node:3000"
           readinessProbe:
             httpGet:
               path: /health
