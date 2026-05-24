@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: sonsaekim-progress
-          image: mminnn28/sswu_sonsaekim-progress:latest
+          image: mminnn28/sswu_sonsaekim-progress:__VERSION__
           imagePullPolicy: Always
           ports:
             - containerPort: 3003

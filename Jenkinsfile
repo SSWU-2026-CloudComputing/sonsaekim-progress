@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     environment {
         DOCKER_LOGIN   = credentials('dockerhub')
         CREDENTIALS_ID = '850d941b-7a1b-479d-8e1d-6b0d40b89d68'
@@ -8,40 +9,92 @@ pipeline {
         LOCATION       = 'asia-northeast3-a'
         IMAGE_NAME     = 'mminnn28/sswu_sonsaekim-progress'
     }
+
     stages {
-        stage('Build') {
+        stage('Checkout') {
+            when {
+                anyOf {
+                    changeRequest()
+                    branch 'main'
+                }
+            }
             steps {
-                echo '도커 이미지 빌드 중...'
-                sh 'docker build -t $IMAGE_NAME:latest .'
+                checkout scm
             }
         }
-        stage('Push') {
+
+        stage('Docker Login') {
+            when {
+                anyOf {
+                    changeRequest()
+                    branch 'main'
+                }
+            }
             steps {
-                echo 'DockerHub 푸시 중...'
-                sh 'echo $DOCKER_LOGIN_PSW | docker login -u $DOCKER_LOGIN_USR --password-stdin'
-                sh 'docker push $IMAGE_NAME:latest'
+                sh """
+                    echo "$DOCKER_LOGIN_PSW" | docker login -u "$DOCKER_LOGIN_USR" --password-stdin
+                """
             }
         }
-        stage('Deploy') {
+
+        stage('Build Image') {
+            when {
+                anyOf {
+                    changeRequest()
+                    branch 'main'
+                }
+            }
             steps {
-                echo 'Kubernetes 배포 중...'
-                sh '''
-                    gcloud container clusters get-credentials $CLUSTER_NAME \
-                        --zone $LOCATION \
-                        --project $PROJECT_ID
-                    kubectl apply -f k8s/progress-deployment.yaml
-                    kubectl rollout restart deployment/progress-service
-                    kubectl rollout status deployment/progress-service
-                '''
+                sh "docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} ."
+            }
+        }
+
+        stage('Push Image') {
+            when {
+                anyOf {
+                    changeRequest()
+                    branch 'main'
+                }
+            }
+            steps {
+                sh "docker push ${IMAGE_NAME}:${BUILD_NUMBER}"
+            }
+        }
+
+        stage('Render Deployment') {
+            when {
+                anyOf {
+                    changeRequest()
+                    branch 'main'
+                }
+            }
+            steps {
+                sh """
+                    sed -i "s#sswu_sonsaekim-progress:.*#sswu_sonsaekim-progress:${BUILD_NUMBER}#g" k8s/deployment.yaml
+                """
+            }
+        }
+
+        stage('Deploy to GKE') {
+            when {
+                branch 'main'
+            }
+            steps {
+                step([
+                    $class: 'KubernetesEngineBuilder',
+                    projectId: env.PROJECT_ID,
+                    clusterName: env.CLUSTER_NAME,
+                    location: env.LOCATION,
+                    manifestPattern: 'k8s/deployment.yaml',
+                    credentialsId: env.CREDENTIALS_ID,
+                    verifyDeployments: false
+                ])
             }
         }
     }
+
     post {
-        success {
-            echo '✅ 배포 성공'
-        }
-        failure {
-            echo '❌ 배포 실패'
-        }
+        success { echo "SUCCESS" }
+        failure { echo "FAILED" }
     }
 }
