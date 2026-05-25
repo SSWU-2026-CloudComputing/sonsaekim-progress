@@ -3,15 +3,9 @@ const express        = require('express');
 const router         = express.Router();
 const ctrl           = require('../controllers/progressController');
 
-// ── 북마크 ────────────────────────────────────────
-// GET  /progress/bookmarks?userId=&sourceType=
-router.get('/bookmarks',    ctrl.getBookmarks);
+router.get('/bookmarks', ctrl.getBookmarks);
 
-// POST /progress/bookmarks
-router.post('/bookmarks',   ctrl.addBookmark);
-
-// DELETE /progress/bookmarks
-router.delete('/bookmarks', ctrl.removeBookmark);
+router.post('/bookmarks/toggle', ctrl.toggleBookmark);
 
 // ── 오답 ──────────────────────────────────────────
 // GET /progress/wrong-answers?userId=
