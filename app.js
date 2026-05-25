@@ -1,5 +1,6 @@
 // app.js
 require('dotenv').config();
+const PORT = process.env.PORT || 3002;
 const express = require('express');
 const { connect } = require('./configs/rabbitmq');
 const { sequelize } = require('./models');
@@ -42,7 +43,7 @@ const validateEnv = () => {
 const start = async () => {
     //환경변수 검증 실시
     validateEnv();  
-    
+   try { 
 	// 1. DB 연결 확인
         await sequelize.sync();
         console.log('✅ Progress DB 연결 완료');
