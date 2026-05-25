@@ -12,7 +12,7 @@ const start = async () => {
     const q = await ch.assertQueue('progress.user.signed-up', { durable: true });
     await ch.bindQueue(q.queue, 'auth.events', 'user.signed-up');
 
-    ch.consume('user.signed-up', async (msg) => {
+    ch.consume(q.queue, async (msg) => {
         try {
             const { userId } = JSON.parse(msg.content.toString());
             await progressService.initUserProgress(userId);
