@@ -42,8 +42,8 @@ const validateEnv = () => {
 const start = async () => {
     //환경변수 검증 실시
     validateEnv();  
-    try {
-        // 1. DB 연결 확인
+    
+	// 1. DB 연결 확인
         await sequelize.sync();
         console.log('✅ Progress DB 연결 완료');
 
