@@ -1,0 +1,49 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql123
+      MYSQL_DATABASE: progress_db
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  progress-service:
+    build: .
+    ports:
+      - "3002:3002"
+    environment:
+      PORT: 3002
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: progress_db
+      DB_USER: root
+      DB_PASS: mysql123
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      USER_SERVICE_URL: http://host.docker.internal:3001
+      LEARNING_SERVICE_URL: http://host.docker.internal:3002
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
