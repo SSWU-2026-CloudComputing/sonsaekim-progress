@@ -169,22 +169,7 @@ exports.getUserTopScore = async (userId) => {
 };
 
 
-// ══════════════════════════════════════════════════════════
-// 마이페이지 집계 ← mypageService.renderMypage 에서 가져옴
-// User.findOne() → userServiceClient 호출로 교체
-// ══════════════════════════════════════════════════════════
 exports.getMypage = async (userId) => {
-    // 기존: const user = await User.findOne(...)
-    // 전환: User Service API 호출
-    
-    // User Service 장애 시 기본값으로 fallback
-    let user = { name: '알 수 없음', email: '', favorite_study: null };
-    try {
-        user = await userClient.getUserById(userId);
-    } catch (err) {
-        console.error('[getMypage] User Service 호출 실패, fallback 사용:', err.message);
-    }
-
     const today     = new Date();
     const startDate = new Date();
     startDate.setDate(today.getDate() - 27);
@@ -266,9 +251,6 @@ exports.getMypage = async (userId) => {
     ]);
 
     return {
-        name:            user.name,
-        email:           user.email,
-        favorite:        user.favorite_study,
         level:           stat.level,
         totalDays,
         daysToNextLevel: 7 - (totalDays % 7),
