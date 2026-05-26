@@ -13,7 +13,11 @@ exports.getMypage = async (req, res) => {
 
 exports.getWrongIds = async (req, res) => {
     try {
-        const data = await progressService.getWrongIds(req.userId);
+        const { userId } = req.query;
+        if (!userId) {
+            return res.status(400).json({ message: 'userId가 필요합니다.' });
+        }
+        const data = await progressService.getWrongIds(userId);
         res.json(data);
     } catch (err) {
         console.error('getWrongIds 오류:', err);
