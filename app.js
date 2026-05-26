@@ -4,7 +4,7 @@ const express = require('express');
 const { connect } = require('./configs/rabbitmq');
 const { sequelize } = require('./models');
 const progressRouter = require('./routers/progressRouter');
-
+const PORT = process.env.PORT || 3001;
 const quizSubmittedConsumer      = require('./consumers/quizSubmittedConsumer');
 const gamePlayedConsumer         = require('./consumers/gamePlayedConsumer');
 const userSignedUpConsumer       = require('./consumers/userSignedUpConsumer');
@@ -25,18 +25,18 @@ const validateEnv = () => {
         'PORT',
         'DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASS',
         'RABBITMQ_URL',
-        'USER_SERVICE_URL',
+        'AUTH_SERVICE_URL',
         'LEARNING_SERVICE_URL',
     ];
 
     const missing = required.filter(key => !process.env[key]);
 
     if (missing.length > 0) {
-        console.error('❌ 필수 환경변수 누락:', missing.join(', '));
+        console.error('필수 환경변수 누락:', missing.join(', '));
         process.exit(1);
     }
 
-    console.log('✅ 환경변수 검증 완료');
+    console.log('환경변수 검증 완료');
 };
 
 const start = async () => {
@@ -45,7 +45,7 @@ const start = async () => {
     try {
         // 1. DB 연결 확인
         await sequelize.sync();
-        console.log('✅ Progress DB 연결 완료');
+        console.log('Progress DB 연결 완료');
 
         // 2. RabbitMQ 연결
         await connect();
@@ -58,11 +58,11 @@ const start = async () => {
 
         // 4. 서버 시작
         app.listen(PORT, '0.0.0.0', () => {
-            console.log(`✅ Progress Service running on port ${PORT}`);
+            console.log(`Progress Service running on port ${PORT}`);
         });
 
     } catch (err) {
-        console.error('❌ Progress Service 시작 실패:', err);
+        console.error('Progress Service 시작 실패:', err);
         process.exit(1);
     }
 };
