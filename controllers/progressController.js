@@ -1,9 +1,9 @@
-// controllers/progressController.js
 const progressService = require('../services/progressService');
 
 exports.getMypage = async (req, res) => {
     try {
-        const data = await progressService.getMypage(req.userId);
+        const { userId } = req.query;
+        const data = await progressService.getMypage(userId);
         res.json(data);
     } catch (err) {
         console.error('getMypage 오류:', err);
@@ -73,7 +73,8 @@ exports.toggleBookmark = async (req, res) => {
 
 exports.getVcBookmarkDetail = async (req, res) => {
     try {
-        const data = await progressService.getVcBookmarkDetail(req.userId, req.params.id);
+        const { userId } = req.query;
+        const data = await progressService.getVcBookmarkDetail(userId, req.params.id);
         res.json(data);
     } catch (err) {
         console.error('getVcBookmarkDetail 오류:', err);
@@ -83,7 +84,8 @@ exports.getVcBookmarkDetail = async (req, res) => {
 
 exports.getWordBookmarkDetail = async (req, res) => {
     try {
-        const data = await progressService.getWordBookmarkDetail(req.userId, req.params.id);
+        const { userId } = req.query;
+        const data = await progressService.getWordBookmarkDetail(userId, req.params.id);
         res.json(data);
     } catch (err) {
         console.error('getWordBookmarkDetail 오류:', err);
@@ -93,8 +95,8 @@ exports.getWordBookmarkDetail = async (req, res) => {
 
 exports.createRecord = async (req, res) => {
     try {
-        const { score, userName } = req.body;
-        await progressService.createRecord(req.userId, score, userName);
+        const { userId, score, userName } = req.body;
+        await progressService.createRecord(userId, score, userName);
         res.json({ message: '기록 저장 완료' });
     } catch (err) {
         console.error('createRecord 오류:', err);
@@ -104,9 +106,10 @@ exports.createRecord = async (req, res) => {
 
 exports.getAllGameRecords = async (req, res) => {
     try {
-        const records = await gameService.getAllRecords();
+        const records = await progressService.getAllRecords();
         res.json(records);
     } catch (err) {
+        console.error('getAllGameRecords 오류:', err);
         res.status(500).json({ error: '기록 가져오기 실패' });
     }
 };
@@ -123,20 +126,40 @@ exports.getTop3Records = async (req, res) => {
 
 exports.getUserTopScore = async (req, res) => {
     try {
-        const score = await progressService.getUserTopScore(req.userId);
-        res.json({ score });
+        const { userId } = req.query;
+        if (!userId) {
+            return res.status(400).json({
+                message: 'userId가 필요합니다.'
+            });
+        }
+        const score = await progressService.getUserTopScore(userId);
+        res.json({
+            score: score || 0
+        });
     } catch (err) {
         console.error('getUserTopScore 오류:', err);
-        res.status(500).json({ message: '서버 오류' });
+        res.status(500).json({
+            message: '서버 오류'
+        });
     }
 };
 
 exports.checkAttendance = async (req, res) => {
     try {
-        await progressService.checkAttendance(req.userId);
-        res.json({ message: '출석 완료' });
+        const { userId } = req.body;
+        if (!userId) {
+            return res.status(400).json({
+                message: 'userId가 필요합니다.'
+            });
+        }
+        await progressService.checkAttendance(userId);
+        res.json({
+            message: '출석 완료'
+        });
     } catch (err) {
         console.error('checkAttendance 오류:', err);
-        res.status(500).json({ message: '서버 오류' });
+        res.status(500).json({
+            message: '서버 오류'
+        });
     }
 };
