@@ -1,6 +1,5 @@
 // app.js
 require('dotenv').config();
-const PORT = process.env.PORT || 3002;
 const express = require('express');
 const { connect } = require('./configs/rabbitmq');
 const { sequelize } = require('./models');
