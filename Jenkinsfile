@@ -87,7 +87,7 @@ pipeline {
                     location: env.LOCATION,
                     manifestPattern: 'k8s/progress-deployment.yaml',
                     credentialsId: env.CREDENTIALS_ID,
-                    verifyDeployments: false
+                    verifyDeployments: true
                 ])
             }
         }
