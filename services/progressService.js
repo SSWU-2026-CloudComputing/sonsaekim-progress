@@ -129,7 +129,7 @@ exports.toggleBookmark = async (userId, sourceType, sourceId) => {
         return 'added';
     }
 
-    throw new Error('유효하지 않은 sourceType입니다');
+    throw new Error('유효하지 않은 sourceType입니다.');
 };
 
 
