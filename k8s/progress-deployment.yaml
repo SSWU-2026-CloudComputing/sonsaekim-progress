@@ -20,19 +20,10 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 3002
+          envFrom:
+            - configMapRef:
+                name: progress-config
           env:
-            - name: PORT
-              value: "3002"
-            - name: NODE_ENV
-              value: "production"
-            - name: DB_HOST
-              value: "10.178.0.33"
-            - name: DB_PORT
-              value: "3306"
-            - name: DB_NAME
-              value: "progress_db"
-            - name: DB_USER
-              value: "root"
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -43,10 +34,6 @@ spec:
                 secretKeyRef:
                   name: progress-secret
                   key: RABBITMQ_URL
-            - name: AUTH_SERVICE_URL
-              value: "http://sonsaekim-auth-svc"
-            - name: LEARNING_SERVICE_URL
-              value: "http://node:3000"
           readinessProbe:
             httpGet:
               path: /health
