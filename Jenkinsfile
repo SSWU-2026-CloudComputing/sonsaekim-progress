@@ -15,7 +15,7 @@ pipeline {
             when {
                 anyOf {
                     changeRequest()
-                    branch 'main'
+                    expression { env.GIT_BRANCH ==~ /.*main$/ }
                 }
             }
             steps {
@@ -27,7 +27,7 @@ pipeline {
             when {
                 anyOf {
                     changeRequest()
-                    branch 'main'
+                    expression { env.GIT_BRANCH ==~ /.*main$/ }
                 }
             }
             steps {
@@ -41,7 +41,7 @@ pipeline {
             when {
                 anyOf {
                     changeRequest()
-                    branch 'main'
+                    expression { env.GIT_BRANCH ==~ /.*main$/ }
                 }
             }
             steps {
@@ -53,7 +53,7 @@ pipeline {
             when {
                 anyOf {
                     changeRequest()
-                    branch 'main'
+                    expression { env.GIT_BRANCH ==~ /.*main$/ }
                 }
             }
             steps {
@@ -65,19 +65,19 @@ pipeline {
             when {
                 anyOf {
                     changeRequest()
-                    branch 'main'
+                    expression { env.GIT_BRANCH ==~ /.*main$/ }
                 }
             }
             steps {
                 sh """
-                    sed -i "s#sswu_sonsaekim-progress:.*#sswu_sonsaekim-progress:${BUILD_NUMBER}#g" k8s/deployment.yaml
+                    sed -i "s#sswu_sonsaekim-progress:.*#sswu_sonsaekim-progress:${BUILD_NUMBER}#g" k8s/progress-deployment.yaml
                 """
             }
         }
 
         stage('Deploy to GKE') {
             when {
-                branch 'main'
+                expression { env.GIT_BRANCH ==~ /.*main$/ }
             }
             steps {
                 step([
@@ -85,7 +85,7 @@ pipeline {
                     projectId: env.PROJECT_ID,
                     clusterName: env.CLUSTER_NAME,
                     location: env.LOCATION,
-                    manifestPattern: 'k8s/deployment.yaml',
+                    manifestPattern: 'k8s/progress-deployment.yaml',
                     credentialsId: env.CREDENTIALS_ID,
                     verifyDeployments: false
                 ])
