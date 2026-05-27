@@ -43,7 +43,7 @@ spec:
                 secretKeyRef:
                   name: progress-secret
                   key: RABBITMQ_URL
-            - name: USER_SERVICE_URL
+            - name: AUTH_SERVICE_URL
               value: "http://sonsaekim-auth-svc"
             - name: LEARNING_SERVICE_URL
               value: "http://node:3000"
