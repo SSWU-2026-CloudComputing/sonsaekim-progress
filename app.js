@@ -19,7 +19,7 @@ app.use('/progress', progressRouter);
 const validateEnv = () => {
     const required = [
         'PORT',
-        'DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASS',
+        'DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASSWORD',
         'RABBITMQ_URL',
         'AUTH_SERVICE_URL',
         'LEARNING_SERVICE_URL',

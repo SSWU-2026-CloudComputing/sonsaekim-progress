@@ -36,7 +36,7 @@ services:
       DB_PORT: 3306
       DB_NAME: progress_db
       DB_USER: root
-      DB_PASS: mysql123
+      DB_PASSWORD: mysql123
       RABBITMQ_URL: amqp://rabbitmq:5672
       USER_SERVICE_URL: http://host.docker.internal:3001
       LEARNING_SERVICE_URL: http://host.docker.internal:3002

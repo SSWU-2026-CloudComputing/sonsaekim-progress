@@ -33,11 +33,11 @@ spec:
               value: "progress_db"
             - name: DB_USER
               value: "root"
-            - name: DB_PASS
+            - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: progress-secret
-                  key: DB_PASS
+                  key: DB_PASSWORD
             - name: RABBITMQ_URL
               valueFrom:
                 secretKeyRef:
