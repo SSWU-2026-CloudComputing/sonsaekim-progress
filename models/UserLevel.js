@@ -1,4 +1,3 @@
-// models/UserLevel.js (신규)
 const { DataTypes } = require('sequelize');
 const sequelize = require('../configs/db');
 

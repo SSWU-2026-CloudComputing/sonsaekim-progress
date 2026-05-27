@@ -1,4 +1,3 @@
-// consumers/quizSubmittedConsumer.js
 const { getChannel }  = require('../configs/rabbitmq');
 const progressService = require('../services/progressService');
 
@@ -6,7 +5,6 @@ const start = async () => {
     const ch = getChannel();
 
 
-    // Learning 팀 Queue 그대로 사용
     await ch.assertQueue('quiz.submitted', { durable: true });
     await ch.bindQueue('quiz.submitted', 'learning.events', 'quiz.submitted');
 

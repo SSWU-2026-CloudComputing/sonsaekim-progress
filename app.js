@@ -1,4 +1,3 @@
-// app.js
 require('dotenv').config();
 const express = require('express');
 const { connect } = require('./configs/rabbitmq');
@@ -13,13 +12,10 @@ const inferenceCompletedConsumer = require('./consumers/inferenceCompletedConsum
 const app = express();
 app.use(express.json());
 
-// 헬스체크 (Kubernetes Liveness Probe용)
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
-//라우터
 app.use('/progress', progressRouter);
 
-//환경변수 검증 함수
 const validateEnv = () => {
     const required = [
         'PORT',
@@ -40,7 +36,6 @@ const validateEnv = () => {
 };
 
 const start = async () => {
-    //환경변수 검증 실시
     validateEnv();  
    try { 
 	// 1. DB 연결 확인

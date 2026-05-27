@@ -1,14 +1,11 @@
-// consumers/userSignedUpConsumer.js
 const { getChannel }  = require('../configs/rabbitmq');
 const progressService = require('../services/progressService');
 
 const start = async () => {
     const ch = getChannel();
 
-    // auth.events Exchange 선언 (Auth 팀과 동일)
     await ch.assertExchange('auth.events', 'topic', { durable: true });
 
-    // Queue 생성 후 Exchange에 바인딩
     const q = await ch.assertQueue('progress.user.signed-up', { durable: true });
     await ch.bindQueue(q.queue, 'auth.events', 'user.signed-up');
 

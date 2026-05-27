@@ -1,5 +1,3 @@
-// consumers/inferenceCompletedConsumer.js
-// AI 팀과 payload 스펙 협의 후 완성 예정
 const { getChannel } = require('../configs/rabbitmq');
 
 const start = async () => {
@@ -9,7 +7,6 @@ const start = async () => {
     ch.consume('inference.completed', async (msg) => {
         try {
             const payload = JSON.parse(msg.content.toString());
-            // TODO: AI 팀 스펙 확정 후 progressService 호출 추가
             console.log('[inference.completed] 수신:', payload);
             ch.ack(msg);
         } catch (err) {

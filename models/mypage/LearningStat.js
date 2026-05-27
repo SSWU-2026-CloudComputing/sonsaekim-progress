@@ -1,5 +1,3 @@
-//학습통계 
-
 module.exports = (sequelize, DataTypes) => {
   const LearningStat = sequelize.define("LearningStat", {
     stat_id: {

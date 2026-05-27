@@ -1,4 +1,3 @@
-//  출석
 module.exports = (sequelize, DataTypes) => {
   const Attendance = sequelize.define("Attendance", {
     attendance_id: {
