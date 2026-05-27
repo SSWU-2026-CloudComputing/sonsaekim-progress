@@ -1,4 +1,3 @@
-// services/progressService.js
 require('dotenv').config();
 const { Op, Sequelize } = require('sequelize');
 const {
@@ -9,23 +8,18 @@ const {
 const userClient     = require('../lib/userServiceClient');
 const learningClient = require('../lib/learningServiceClient');
 
-// ── 날짜 유틸 ────────────────────────────────────────────
 const getKoreanDateString = (date = new Date()) => {
     const koreaOffset = 9 * 60 * 60 * 1000;
     return new Date(date.getTime() + koreaOffset).toISOString().slice(0, 10);
 };
 
-// ── 레벨 계산 (최대 3까지) ──────────────────────
-const MAX_LEVEL = 3; // EJS에 level1~3.svg 까지만 있음
+const MAX_LEVEL = 3; 
 
 const calcLevel = (totalDays) => {
     const level = Math.floor(totalDays / 7) + 1;
-    return Math.min(level, MAX_LEVEL); // 최대 3으로 제한
+    return Math.min(level, MAX_LEVEL); 
 };
 
-// ══════════════════════════════════════════════════════════
-// 오답 저장 ← quizService.saveQuizResults 에서 가져옴
-// ══════════════════════════════════════════════════════════
 exports.saveQuizResults = async (userId, quizResults) => {
     for (const result of quizResults) {
         const common = {
@@ -62,10 +56,6 @@ exports.saveQuizResults = async (userId, quizResults) => {
 };
 
 
-// ══════════════════════════════════════════════════════════
-// 오답 ID 목록 반환 ← quizService.getWrongAnswers 에서 ID 부분만
-// (이미지 조회는 Learning 팀 API 호출로 대체)
-// ══════════════════════════════════════════════════════════
 exports.getWrongIds = async (userId) => {
     const [vcWrongs, wordWrongs] = await Promise.all([
         VcWrong.findAll({
@@ -143,16 +133,11 @@ exports.toggleBookmark = async (userId, sourceType, sourceId) => {
 };
 
 
-
-// ══════════════════════════════════════════════════════════
-// 게임 기록 ← gameService 에서 가져옴
-// ══════════════════════════════════════════════════════════
 exports.createRecord = async (userId, score, userName) => {
     return await GameRecord.create({ user_id: userId, score, user_name: userName });
 };
 
 exports.getTop3Records = async () => {
-    // User JOIN 제거 — user_name 컬럼 직접 사용
     return await GameRecord.findAll({
         order: [['score', 'DESC']],
         limit: 3,
@@ -227,7 +212,6 @@ exports.getMypage = async (userId) => {
         BookmarkWord.findAll({ where: { user_id: userId } }),
     ]);
 
-    // 개선- vc와 word를 동시에 실행
     const [vcBookmarks, wordBookmarks] = await Promise.all([
 
     	Promise.all(vcBookmarksRaw.map(async (b) => {
@@ -256,20 +240,15 @@ exports.getMypage = async (userId) => {
         daysToNextLevel: 7 - (totalDays % 7),
         continuousDays:  continuous,
         attendanceDates,
-        vcBookmarks,    // ← { vc_id, image, description } 배열
-        wordBookmarks,  // ← { word_id, image, description } 배열
+        vcBookmarks,   
+        wordBookmarks, 
     };
 };
 
-
-// ══════════════════════════════════════════════════════════
-// 북마크 상세 ← mypageService.renderVcDetail / renderWordDetail 에서 가져옴
-// SignVc.findOne() → learningServiceClient 호출로 교체
-// ══════════════════════════════════════════════════════════
 exports.getVcBookmarkDetail = async (userId, vcId) => {
     const [vcDetail, bookmark] = await Promise.all([
-        learningClient.getSignVcById(vcId),  // 기존: SignVc.findOne(...)
-        BookmarkVc.findOne({ where: { user_id: userId, vc_id: vcId } }),
+        learningClient.getSignVcById(vcId), 
+	BookmarkVc.findOne({ where: { user_id: userId, vc_id: vcId } }),
     ]);
 
     return {
@@ -283,7 +262,7 @@ exports.getVcBookmarkDetail = async (userId, vcId) => {
 
 exports.getWordBookmarkDetail = async (userId, wordId) => {
     const [wordDetail, bookmark] = await Promise.all([
-        learningClient.getSignWordById(wordId),  // 기존: SignWord.findOne(...)
+        learningClient.getSignWordById(wordId), 
         BookmarkWord.findOne({ where: { user_id: userId, word_id: wordId } }),
     ]);
 
@@ -296,10 +275,6 @@ exports.getWordBookmarkDetail = async (userId, wordId) => {
     };
 };
 
-
-// ══════════════════════════════════════════════════════════
-// 출석 체크
-// ══════════════════════════════════════════════════════════
 exports.checkAttendance = async (userId) => {
     const todayStr = getKoreanDateString();
     const existing = await Attendance.findOne({
@@ -311,9 +286,6 @@ exports.checkAttendance = async (userId) => {
 };
 
 
-// ══════════════════════════════════════════════════════════
-// 신규 사용자 집계 row 초기화 (UserSignedUp 이벤트 소비)
-// ══════════════════════════════════════════════════════════
 exports.initUserProgress = async (userId) => {
     const existing = await LearningStat.findOne({ where: { user_id: userId } });
     if (!existing) {
