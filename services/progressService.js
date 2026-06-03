@@ -22,35 +22,70 @@ const calcLevel = (totalDays) => {
 
 exports.saveQuizResults = async (userId, quizResults) => {
     for (const result of quizResults) {
-        const common = {
-            is_follow:    result.is_follow    ?? false,
-            is_relearned: result.is_relearned ?? false,
-            created_at:   new Date(),
-        };
+        const isCorrect = Number(result.selected) === Number(result.answer);
 
         if (result.source_type === 'sign_word') {
-            const where = { user_id: userId, word_id: result.source_id };
+            const where = {
+                user_id: userId,
+                word_id: result.source_id,
+            };
+
             const existing = await WordWrong.findOne({ where });
+
             if (existing) {
-                if (existing.is_relearned !== common.is_relearned ||
-                    existing.is_follow    !== common.is_follow) {
-                    await WordWrong.update(common, { where });
-                }
-            } else {
-                await WordWrong.create({ user_id: userId, word_id: result.source_id, ...common });
+                await WordWrong.update(
+                    {
+                        is_follow: result.is_follow ?? existing.is_follow,
+                        is_relearned: isCorrect,
+                    },
+                    { where }
+                );
+                continue;
             }
 
-        } else if (result.source_type === 'sign_vc') {
-            const where = { user_id: userId, vc_id: result.source_id };
-            const existing = await VcWrong.findOne({ where });
-            if (existing) {
-                if (existing.is_relearned !== common.is_relearned ||
-                    existing.is_follow    !== common.is_follow) {
-                    await VcWrong.update(common, { where });
-                }
-            } else {
-                await VcWrong.create({ user_id: userId, vc_id: result.source_id, ...common });
+            if (!isCorrect) {
+                await WordWrong.create({
+                    user_id: userId,
+                    word_id: result.source_id,
+                    is_follow: result.is_follow ?? false,
+                    is_relearned: false,
+                    created_at: new Date(),
+                });
             }
+
+            continue;
+        }
+
+        if (result.source_type === 'sign_vc') {
+            const where = {
+                user_id: userId,
+                vc_id: result.source_id,
+            };
+
+            const existing = await VcWrong.findOne({ where });
+
+            if (existing) {
+                await VcWrong.update(
+                    {
+                        is_follow: result.is_follow ?? existing.is_follow,
+                        is_relearned: isCorrect,
+                    },
+                    { where }
+                );
+                continue;
+            }
+
+            if (!isCorrect) {
+                await VcWrong.create({
+                    user_id: userId,
+                    vc_id: result.source_id,
+                    is_follow: result.is_follow ?? false,
+                    is_relearned: false,
+                    created_at: new Date(),
+                });
+            }
+
+            continue;
         }
     }
 };
