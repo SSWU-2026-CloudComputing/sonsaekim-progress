@@ -17,7 +17,7 @@ const start = async () => {
             console.log(`[quiz-submitted-queue] userId=${userId} 오답 저장 완료`);
         } catch (err) {
             console.error('[quiz-submitted-queue] 처리 오류:', err);
-            ch.nack(msg, false, false);
+            ch.nack(msg, false, true);
         }
     });
 

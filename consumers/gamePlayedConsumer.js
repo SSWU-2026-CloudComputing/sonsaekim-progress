@@ -17,7 +17,7 @@ const start = async () => {
             console.log(`[game-played-queue] userId=${userId} score=${score} 기록 저장 완료`);
         } catch (err) {
             console.error('[game-played-queue] 처리 오류:', err);
-            ch.nack(msg, false, false);
+            ch.nack(msg, false, true);
         }
     });
 
