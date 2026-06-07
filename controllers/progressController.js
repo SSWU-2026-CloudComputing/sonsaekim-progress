@@ -144,6 +144,18 @@ exports.getUserTopScore = async (req, res) => {
     }
 };
 
+exports.initUserProgress = async (req, res) => {
+    try {
+        const { userId } = req.body;
+        if (!userId) return res.status(400).json({ message: 'userId가 필요합니다.' });
+        await progressService.initUserProgress(userId);
+        res.json({ message: '유저 progress 초기화 완료' });
+    } catch (err) {
+        console.error('initUserProgress 오류:', err);
+        res.status(500).json({ message: '서버 오류' });
+    }
+};
+
 exports.checkAttendance = async (req, res) => {
     try {
         const { userId } = req.body;
