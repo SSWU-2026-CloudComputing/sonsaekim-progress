@@ -5,23 +5,23 @@ const start = async () => {
     const ch = getChannel();
 
 
-    await ch.assertQueue('game.played', { durable: true });
-    await ch.bindQueue('game.played', 'learning.events', 'game.played');
+    await ch.assertQueue('game-played-queue', { durable: true });
+    await ch.bindQueue('game-played-queue', 'learning.events', 'game.played');
 
-    ch.consume('game.played', async (msg) => {
+    ch.consume('game-played-queue', async (msg) => {
         if (!msg) return;
         try {
             const { userId, userName, score } = JSON.parse(msg.content.toString());
             await progressService.createRecord(userId, score, userName);
             ch.ack(msg);
-            console.log(`[game.played] userId=${userId} score=${score} 기록 저장 완료`);
+            console.log(`[game-played-queue] userId=${userId} score=${score} 기록 저장 완료`);
         } catch (err) {
-            console.error('[game.played] 처리 오류:', err);
-            ch.nack(msg, false, true);
+            console.error('[game-played-queue] 처리 오류:', err);
+            ch.nack(msg, false, false);
         }
     });
 
-    console.log('[Consumer] game.played 구독 시작');
+    console.log('[Consumer] game-played-queue 구독 시작');
 };
 
 module.exports = { start };

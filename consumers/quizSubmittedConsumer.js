@@ -5,23 +5,23 @@ const start = async () => {
     const ch = getChannel();
 
 
-    await ch.assertQueue('quiz.submitted', { durable: true });
-    await ch.bindQueue('quiz.submitted', 'learning.events', 'quiz.submitted');
+    await ch.assertQueue('quiz-submitted-queue', { durable: true });
+    await ch.bindQueue('quiz-submitted-queue', 'learning.events', 'quiz.submitted');
 
-    ch.consume('quiz.submitted', async (msg) => {
+    ch.consume('quiz-submitted-queue', async (msg) => {
         if (!msg) return;
         try {
             const { userId, quizResults } = JSON.parse(msg.content.toString());
             await progressService.saveQuizResults(userId, quizResults);
             ch.ack(msg);
-            console.log(`[quiz.submitted] userId=${userId} 오답 저장 완료`);
+            console.log(`[quiz-submitted-queue] userId=${userId} 오답 저장 완료`);
         } catch (err) {
-            console.error('[quiz.submitted] 처리 오류:', err);
-            ch.nack(msg, false, true);
+            console.error('[quiz-submitted-queue] 처리 오류:', err);
+            ch.nack(msg, false, false);
         }
     });
 
-    console.log('[Consumer] quiz.submitted 구독 시작');
+    console.log('[Consumer] quiz-submitted-queue 구독 시작');
 };
 
 module.exports = { start };
