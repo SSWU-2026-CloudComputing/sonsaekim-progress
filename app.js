@@ -6,7 +6,6 @@ const progressRouter = require('./routers/progressRouter');
 const PORT = process.env.PORT || 3002;
 const quizSubmittedConsumer      = require('./consumers/quizSubmittedConsumer');
 const gamePlayedConsumer         = require('./consumers/gamePlayedConsumer');
-const userSignedUpConsumer       = require('./consumers/userSignedUpConsumer');
 const inferenceCompletedConsumer = require('./consumers/inferenceCompletedConsumer');
 
 const app = express();
@@ -48,7 +47,6 @@ const start = async () => {
         // 3. Consumer 시작
         await quizSubmittedConsumer.start();
         await gamePlayedConsumer.start();
-        await userSignedUpConsumer.start();
         await inferenceCompletedConsumer.start();
 
         // 4. 서버 시작

@@ -16,6 +16,8 @@ router.get('/score/best',    ctrl.getUserTopScore);
 
 router.get('/mypage',                          ctrl.getMypage);
 
+router.post('/user-init',                      ctrl.initUserProgress);
+
 router.post('/attendance',                     ctrl.checkAttendance);
 
 router.post('/game/record',                    ctrl.createRecord);
